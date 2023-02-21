@@ -1,0 +1,214 @@
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { Container, Nav, Navbar, NavDropdown, Badge } from "react-bootstrap";
+import { useContext } from "react";
+import { UserContext } from "../context/userContext";
+import { useQuery } from "react-query";
+import { API } from "../config/api";
+import Swal from "sweetalert2";
+
+import Login from "./Auth/Login";
+import Register from "./Auth/Register";
+
+import circleLogo from "../assets/circleLogo.png";
+import Avatar from "react-avatar";
+import logoNav from "../assets/logoNav.png";
+
+import profileicon from "../assets/imgp.png";
+import complainicon from "../assets/complainicon.png";
+import logouticon from "../assets/logouticon.png";
+import cart from "../assets/cart.png";
+import addbook from "../assets/addbook.png";
+
+import { BsPerson, BsCalendar3 } from "react-icons/bs";
+
+export default function NavbarUser() {
+  const { data: user } = useQuery("profileCache", async () => {
+    const response = await API.get("/user");
+
+    return response.data.data;
+  });
+
+  console.log("data user", user);
+
+  const [state, dispatch] = useContext(UserContext);
+  console.log("ini state", state);
+  let { data: cartUser, refetch } = useQuery(
+    "cartUserLengthCache",
+    async () => {
+      const response = await API.get("/user-cart");
+      return response.data.data;
+    }
+  );
+
+  const logout = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Logout",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch({
+          type: "LOGOUT",
+        });
+        Swal.fire("Logged Out Success");
+      }
+    });
+  };
+
+  const [modalLogin, setModalLogin] = useState(false);
+  const [modalRegister, setModalRegister] = useState(false);
+
+  const navigate = useNavigate();
+
+  return (
+    <>
+      <Navbar bg="white" expand="lg">
+        <Container>
+          <div>
+            <Navbar.Brand onClick={() => navigate("/income")}>
+              <img src={circleLogo} alt="" style={{ opacity: "0.2" }} />
+              <img
+                className="pointer"
+                src={logoNav}
+                alt="logo"
+                style={{
+                  position: "absolute",
+                  marginLeft: "-4rem",
+                  marginTop: "1rem",
+                }}
+              />
+            </Navbar.Brand>
+          </div>
+
+          <div>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="me-auto">
+                {state.isLogin === true ? (
+                  <>
+                    <NavDropdown
+                      title={
+                        <Avatar
+                          src={profileicon}
+                          alt={profileicon}
+                          size="65"
+                          round={true}
+                        />
+                      }
+                      id="basic-nav-dropdown"
+                    >
+                      {state?.user?.role === "user" ? (
+                        <>
+                          <NavDropdown.Item
+                            onClick={() => {
+                              navigate(`/profile`);
+                            }}
+                          >
+                            <img
+                              src={user?.image}
+                              alt=""
+                              style={{ width: "20%", marginRight: "1rem" }}
+                            />
+                            {/* <BsPerson /> */}
+                            Profile
+                          </NavDropdown.Item>
+                          <NavDropdown.Item>
+                            <img
+                              src={complainicon}
+                              alt=""
+                              style={{ width: "20%", marginRight: "1rem" }}
+                            />
+                            Complain
+                          </NavDropdown.Item>
+                        </>
+                      ) : (
+                        <>
+                          <NavDropdown.Item
+                            onClick={() => {
+                              navigate(`/add-book`);
+                            }}
+                          >
+                            <img
+                              src={addbook}
+                              alt=""
+                              style={{ width: "20%", marginRight: "1rem" }}
+                            />
+                            Add Book
+                          </NavDropdown.Item>
+                          <NavDropdown.Item
+                            onClick={() => {
+                              navigate(`/income`);
+                            }}
+                          >
+                            <img
+                              src={addbook}
+                              alt=""
+                              style={{ width: "20%", marginRight: "1rem" }}
+                            />
+                            Income
+                          </NavDropdown.Item>
+                        </>
+                      )}
+                      <NavDropdown.Divider />
+                      <NavDropdown.Item onClick={logout}>
+                        <img
+                          src={logouticon}
+                          alt=""
+                          style={{ width: "20%", marginRight: "1rem" }}
+                        />
+                        Logout
+                      </NavDropdown.Item>
+                    </NavDropdown>
+                  </>
+                ) : (
+                  <div>
+                    <button
+                      onClick={() => setModalLogin(true)}
+                      className="px-5 p-2"
+                      style={{
+                        borderStyle: "solid",
+                        borderWidth: "1px",
+                        backgroundColor: "white",
+                        color: "black",
+                      }}
+                    >
+                      LOGIN
+                    </button>
+                    <button
+                      onClick={() => setModalRegister(true)}
+                      className="ms-3 px-5 p-2"
+                      style={{
+                        borderStyle: "solid",
+                        borderWidth: "1px",
+                        backgroundColor: "black",
+                        color: "white",
+                      }}
+                    >
+                      Register
+                    </button>
+                  </div>
+                )}
+              </Nav>
+            </Navbar.Collapse>
+          </div>
+        </Container>
+      </Navbar>
+
+      <Login
+        modalLogin={modalLogin}
+        setModalLogin={setModalLogin}
+        switchRegister={setModalRegister}
+      />
+      <Register
+        modalRegister={modalRegister}
+        setModalRegister={setModalRegister}
+        switchLogin={setModalLogin}
+      />
+    </>
+  );
+}
