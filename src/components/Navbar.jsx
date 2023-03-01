@@ -127,14 +127,6 @@ const navigate = useNavigate()
                             {/* <BsPerson /> */}
                             Profile
                           </NavDropdown.Item>
-//                           <NavDropdown.Item>
-//                             <img
-//                               src={complainicon}
-//                               alt=""
-//                               style={{ width: "20%", marginRight: "1rem" }}
-//                             />
-//                             Complain
-//                           </NavDropdown.Item>
                         </>
                       ) : (
                         <>
